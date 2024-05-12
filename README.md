@@ -35,6 +35,8 @@ Additionally, multiple options can be selected
 ```python
 # no less than 2, no more than 3
 myMenu.arrow_select(max_items=(2, 3))
+# Adds an option to select all items
+myMenu.arrow_select(allow_all=True)
 ```
 Output:
 ```python
