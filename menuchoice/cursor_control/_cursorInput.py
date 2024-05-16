@@ -1,6 +1,7 @@
 import curses
 import re
 import shutil
+from . import _textHandler
 
 def getMenuComponents(menuString: str):
     menuLines = menuString.splitlines()
@@ -33,11 +34,7 @@ def cursorArrowMenu(stdscr, menuString: str, menuArrow: str, center: bool = Fals
         rewrittenMenu = rewriteMenu(menuString, menuArrow, currentLineIndex)
         if menuMeta != None:
             if center:
-                lengthiestStr = 0
-                for s in menuMeta:
-                    lengthiestStr = len(s) if len(s) > lengthiestStr else lengthiestStr
-                metaSpacing = getCenteredPos()[0] - lengthiestStr//2
-                menuMeta = [f"{metaSpacing * ' '}{menuMeta[i]}" for i in range(len(menuMeta))]
+                menuMeta = _textHandler.centerArrayItems(menuMeta)
             stdscr.addstr("\n\n".join(menuMeta) + "\n\n")
         if center: rewrittenMenu = makeStrCentered(rewrittenMenu, True)
         stdscr.addstr(rewrittenMenu, currentLineIndex)
@@ -102,12 +99,8 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
         rewrittenMenu = rewriteMultiselectMenu(menuString, currentLineIndex, selectedItems, allowAll)
         if menuMeta != None:
             if center:
-                lengthiestStr = 0
-                for s in menuMeta:
-                    lengthiestStr = len(s) if len(s) > lengthiestStr else lengthiestStr
-                metaSpacing = getCenteredPos()[0] - lengthiestStr//2
-                menuMeta = [f"{' '*metaSpacing}{menuMeta[i]}" for i in range(len(menuMeta))]
-                stdscr.addstr("\n\n".join(menuMeta) + "\n\n")
+                menuMeta = _textHandler.centerArrayItems(menuMeta)
+            stdscr.addstr("\n\n".join(menuMeta) + "\n\n")
         if center: rewrittenMenu = makeStrCentered(rewrittenMenu, True)
         stdscr.addstr(rewrittenMenu, currentLineIndex)
         keyPressed = stdscr.getch()
@@ -128,3 +121,32 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
                     continue
                 selectedItems.append(currentLineIndex) if not currentLineIndex in selectedItems else selectedItems.pop(selectedItems.index(currentLineIndex))
 
+
+def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
+    curses.curs_set(0)
+    currentLineIndex = 0
+    menuLines: list = menuComponents[0]
+    menuTitle, menuDescription = menuComponents[1], menuComponents[2]
+    centerSpacing = _textHandler.getItemSpacing(menuLines)
+    while True:
+        stdscr.clear()
+        stdscr.refresh()
+        if menuTitle != None:
+            if center: stdscr.addstr(_textHandler.getItemSpacing([menuTitle]))
+            stdscr.addstr(menuTitle + "\n\n")
+        if menuDescription != None:
+            if center: stdscr.addstr(_textHandler.getItemSpacing([menuDescription]))
+            stdscr.addstr(menuDescription + "\n\n")
+        if center: stdscr.addstr(_textHandler.getCenteredNewlines(menuLines))
+        for l in menuLines:
+            _strToAdd = "%s\n" % l
+            if center: stdscr.addstr(centerSpacing)
+            stdscr.addstr(_strToAdd) if menuLines.index(l) != currentLineIndex else stdscr.addstr(_strToAdd, curses.A_REVERSE)
+            del _strToAdd
+        keyPressed = stdscr.getch()
+        if keyPressed == curses.KEY_DOWN:
+            currentLineIndex = currentLineIndex + 1 if currentLineIndex != len(menuLines) - 1 else 0
+        elif keyPressed == curses.KEY_UP:
+            currentLineIndex = currentLineIndex - 1 if currentLineIndex != 0 else len(menuLines) - 1
+        elif keyPressed in [curses.KEY_ENTER, 10]:
+            return currentLineIndex
