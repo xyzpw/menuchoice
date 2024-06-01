@@ -6,7 +6,7 @@ from .cursor_control import _cursorInput
 from .exceptions import *
 from . import _validator
 
-__version__ = "0.4"
+__version__ = "0.5"
 __author__ = "xyzpw"
 __description__ = "Command line menu selector."
 __license__ = "MIT"

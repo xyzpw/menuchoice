@@ -25,6 +25,7 @@ def rewriteMenu(menuString: str, menuArrow: str, currentMenuLine: int):
 
 def cursorArrowMenu(stdscr, menuString: str, menuArrow: str, center: bool = False):
     curses.curs_set(0)
+    curses.use_default_colors()
     currentLineIndex = 0
     stdscr.refresh()
     while True:
@@ -87,6 +88,7 @@ def makeStrCentered(targetStr: str, eachLine: bool = False) -> str:
 
 def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None, allowAll: bool = False, center: bool = False):
     curses.curs_set(0)
+    curses.use_default_colors()
     currentLineIndex = 0
     selectedItems = []
     if allowAll:
@@ -124,6 +126,7 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
 
 def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
     curses.curs_set(0)
+    curses.use_default_colors()
     currentLineIndex = 0
     menuLines: list = menuComponents[0]
     menuTitle, menuDescription = menuComponents[1], menuComponents[2]

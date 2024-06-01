@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5 (2024-06-01)
+- added transparency support
+
 ## v0.4 (2024-05-15)
 - added new select option: `highlight_select`
 - bug fixes
