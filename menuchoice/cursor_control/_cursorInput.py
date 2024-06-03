@@ -3,6 +3,8 @@ import re
 import shutil
 from . import _textHandler
 
+KEYS_QUIT = [ord("q"), ord("Q")]
+
 def getMenuComponents(menuString: str):
     menuLines = menuString.splitlines()
     for l in range(len(menuLines)):
@@ -48,6 +50,8 @@ def cursorArrowMenu(stdscr, menuString: str, menuArrow: str, center: bool = Fals
             currentLineIndex = nextLineIndex if currentLineIndex < len(menuLines) - 1 else 0
         elif keyPressed in [curses.KEY_ENTER, 10]:
             return currentLineIndex
+        elif keyPressed in KEYS_QUIT:
+            return
 
 def rewriteMultiselectMenu(menuString: str, currentMenuLine: int, selectedItems: list, allowAll: bool = False):
     menuLines = getMenuComponents(menuString)[0]
@@ -122,6 +126,8 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
                 if currentLineIndex not in selectedItems and (maxItemCount <= len(selectedItems) if maxItemCount != None else False):
                     continue
                 selectedItems.append(currentLineIndex) if not currentLineIndex in selectedItems else selectedItems.pop(selectedItems.index(currentLineIndex))
+        elif keyPressed in KEYS_QUIT:
+            return
 
 
 def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
@@ -153,3 +159,5 @@ def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
             currentLineIndex = currentLineIndex - 1 if currentLineIndex != 0 else len(menuLines) - 1
         elif keyPressed in [curses.KEY_ENTER, 10]:
             return currentLineIndex
+        elif keyPressed in KEYS_QUIT:
+            return

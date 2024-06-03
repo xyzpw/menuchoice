@@ -6,7 +6,7 @@ from .cursor_control import _cursorInput
 from .exceptions import *
 from . import _validator
 
-__version__ = "0.5"
+__version__ = "0.6"
 __author__ = "xyzpw"
 __description__ = "Command line menu selector."
 __license__ = "MIT"
@@ -80,7 +80,7 @@ class MenuSelector:
         else:
             selectedIndexes = curses.wrapper(_cursorInput.cursorArrowMenu, menu, arrow, center)
             usrChoices = [(selectedIndexes, list(self.items)[selectedIndexes])] if selectedIndexes != None else []
-        if not _validator.validateItemSelectionCount(max_items, usrChoices):
+        if not _validator.validateItemSelectionCount(max_items, usrChoices) and bool(usrChoices):
             raise MenuItemError("number of items selected is out of range")
         return usrChoices
     def highlight_select(self, center: bool = False):

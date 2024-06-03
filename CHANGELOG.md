@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.6 (2024-06-02)
+- added ability to press "q" to quit
+
 ## v0.5 (2024-06-01)
 - added transparency support
 
