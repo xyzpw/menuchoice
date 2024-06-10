@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.7 (2024-06-10)
+- improved display
+
 ## v0.6 (2024-06-02)
 - added ability to press "q" to quit
 

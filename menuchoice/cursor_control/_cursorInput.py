@@ -31,7 +31,7 @@ def cursorArrowMenu(stdscr, menuString: str, menuArrow: str, center: bool = Fals
     currentLineIndex = 0
     stdscr.refresh()
     while True:
-        stdscr.clear()
+        stdscr.erase()
         stdscr.refresh()
         menuLines, menuMeta = getMenuComponents(menuString)
         rewrittenMenu = rewriteMenu(menuString, menuArrow, currentLineIndex)
@@ -100,7 +100,7 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
     menuString += "Confirm Selection\n"
     stdscr.refresh()
     while True:
-        stdscr.clear()
+        stdscr.erase()
         menuLines, menuMeta = getMenuComponents(menuString)
         rewrittenMenu = rewriteMultiselectMenu(menuString, currentLineIndex, selectedItems, allowAll)
         if menuMeta != None:
@@ -138,7 +138,7 @@ def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
     menuTitle, menuDescription = menuComponents[1], menuComponents[2]
     centerSpacing = _textHandler.getItemSpacing(menuLines)
     while True:
-        stdscr.clear()
+        stdscr.erase()
         stdscr.refresh()
         if menuTitle != None:
             if center: stdscr.addstr(_textHandler.getItemSpacing([menuTitle]))
