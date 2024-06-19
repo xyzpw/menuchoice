@@ -101,6 +101,7 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
     stdscr.refresh()
     while True:
         stdscr.erase()
+        stdscr.refresh()
         menuLines, menuMeta = getMenuComponents(menuString)
         rewrittenMenu = rewriteMultiselectMenu(menuString, currentLineIndex, selectedItems, allowAll)
         if menuMeta != None:
@@ -130,13 +131,15 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
             return
 
 
-def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
+def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False, disabled_options: list[int] = []):
     curses.curs_set(0)
     curses.use_default_colors()
-    currentLineIndex = 0
     menuLines: list = menuComponents[0]
     menuTitle, menuDescription = menuComponents[1], menuComponents[2]
     centerSpacing = _textHandler.getItemSpacing(menuLines)
+    enabledMenuLines = [i for i in menuLines if menuLines.index(i) not in disabled_options]
+    enabledOptions = [i for i in range(len(menuLines)) if i not in disabled_options]
+    currentLineIndex = min(enabledOptions)
     while True:
         stdscr.erase()
         stdscr.refresh()
@@ -154,9 +157,9 @@ def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False):
             del _strToAdd
         keyPressed = stdscr.getch()
         if keyPressed == curses.KEY_DOWN:
-            currentLineIndex = currentLineIndex + 1 if currentLineIndex != len(menuLines) - 1 else 0
+            currentLineIndex = min([i for i in enabledOptions if i > currentLineIndex]) if currentLineIndex != max(enabledOptions) else min(enabledOptions)
         elif keyPressed == curses.KEY_UP:
-            currentLineIndex = currentLineIndex - 1 if currentLineIndex != 0 else len(menuLines) - 1
+            currentLineIndex = max([i for i in enabledOptions if i < currentLineIndex]) if currentLineIndex != min(enabledOptions) else max(enabledOptions)
         elif keyPressed in [curses.KEY_ENTER, 10]:
             return currentLineIndex
         elif keyPressed in KEYS_QUIT:

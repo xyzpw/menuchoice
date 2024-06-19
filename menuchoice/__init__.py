@@ -6,7 +6,7 @@ from .cursor_control import _cursorInput
 from .exceptions import *
 from . import _validator
 
-__version__ = "0.7"
+__version__ = "0.8"
 __author__ = "xyzpw"
 __description__ = "Command line menu selector."
 __license__ = "MIT"
@@ -83,11 +83,14 @@ class MenuSelector:
         if not _validator.validateItemSelectionCount(max_items, usrChoices) and bool(usrChoices):
             raise MenuItemError("number of items selected is out of range")
         return usrChoices
-    def highlight_select(self, center: bool = False):
+    def highlight_select(self, center: bool = False, disabled_options: list[int] = []):
         """Highlights the options at the current line index.
 
-        :param center: positions the menu selector to the center of the terminal"""
+        :param center: positions the menu selector to the center of the terminal
+        :param disabled_options: an array which contains the indexes of items that cannot be selected"""
+        if set([i for i in range(len(self.items))]) == set(disabled_options):
+            raise MenuItemError("at least one item must be selectable")
         menuComponents = self.items, self.title, self.description
-        selectedIndex = curses.wrapper(_cursorInput.highlightSelectMenu, menuComponents, center)
+        selectedIndex = curses.wrapper(_cursorInput.highlightSelectMenu, menuComponents, center, disabled_options)
         usrChoice = [(selectedIndex, list(self.items)[selectedIndex])] if selectedIndex != None else []
         return usrChoice

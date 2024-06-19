@@ -2,7 +2,7 @@
 ![Pepy Total Downlods](https://img.shields.io/pepy/dt/menuchoice)
 ![GitHub repo size](https://img.shields.io/github/repo-size/xyzpw/menuchoice)
 
-Command line menu selector
+Command line menu selector.
 
 ![menuchoice-demo2](https://github.com/xyzpw/menuchoice/assets/76017734/c3ca060d-0c39-47be-9173-fa0d415a20b9)
 
