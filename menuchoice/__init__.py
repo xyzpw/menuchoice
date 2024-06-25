@@ -6,7 +6,7 @@ from .cursor_control import _cursorInput
 from .exceptions import *
 from . import _validator
 
-__version__ = "0.8"
+__version__ = "0.9"
 __author__ = "xyzpw"
 __description__ = "Command line menu selector."
 __license__ = "MIT"
@@ -83,14 +83,30 @@ class MenuSelector:
         if not _validator.validateItemSelectionCount(max_items, usrChoices) and bool(usrChoices):
             raise MenuItemError("number of items selected is out of range")
         return usrChoices
-    def highlight_select(self, center: bool = False, disabled_options: list[int] = []):
+    def highlight_select(self, center: bool = False, disabled_options: list[int] = [], pages: list[list] = []):
         """Highlights the options at the current line index.
 
         :param center: positions the menu selector to the center of the terminal
-        :param disabled_options: an array which contains the indexes of items that cannot be selected"""
+        :param disabled_options: an array which contains the indexes of items that cannot be selected
+        :param pages: a list of arrays which represent a page containing integers pointing to the indexes of items"""
+        if not isinstance(pages, list): raise MenuItemError("pages must be an array")
         if set([i for i in range(len(self.items))]) == set(disabled_options):
             raise MenuItemError("at least one item must be selectable")
         menuComponents = self.items, self.title, self.description
-        selectedIndex = curses.wrapper(_cursorInput.highlightSelectMenu, menuComponents, center, disabled_options)
+        if pages != []:
+            itemsWithoutPage = []
+            itemsWithPage = []
+            for p in pages:
+                if not isinstance(p, list):
+                    raise MenuItemError("pages must contain only integers within each array, e.g. [[0,1], [2,3]]")
+                if p == []:
+                    raise MenuItemError("all pages must contain at least 1 item")
+                for i in p:
+                    if i not in itemsWithPage: itemsWithPage.append(i)
+            itemsWithoutPage = [i for i in range(len(self.items)) if i not in itemsWithPage]
+            if itemsWithoutPage != []: pages.append([i for i in itemsWithoutPage]) # Creating new page for items not associated with a page
+            selectedIndex = curses.wrapper(_cursorInput.highlightMultiPageSelectMenu, menuComponents, center, disabled_options, pages)
+        else:
+            selectedIndex = curses.wrapper(_cursorInput.highlightSelectMenu, menuComponents, center, disabled_options)
         usrChoice = [(selectedIndex, list(self.items)[selectedIndex])] if selectedIndex != None else []
         return usrChoice

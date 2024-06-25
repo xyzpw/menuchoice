@@ -1,6 +1,7 @@
 # menuchoice
 ![Pepy Total Downlods](https://img.shields.io/pepy/dt/menuchoice)
 ![GitHub repo size](https://img.shields.io/github/repo-size/xyzpw/menuchoice)
+![PyPi - Version](https://img.shields.io/pypi/v/menuchoice)
 
 Command line menu selector.
 
@@ -19,8 +20,7 @@ myMenu = menuchoice.MenuSelector(items=[
 ], title="Most Streamed Music USA", description="Select a genre of music.")
 ```
 > [!TIP]
-> items can be given brief descriptions if they are type dictionary.
-> `{"option": "brief description"}`
+> items can be given brief descriptions if they are type dictionary: `{"option": "brief description"}`
 
 Selecting an option:
 ```python
@@ -42,3 +42,19 @@ Output:
 ```python
 [(4, "EDM"), (1, "Rock")]
 ```
+
+**Highlight menu**<br>
+
+Highlight menus introduce the ability to have multiple pages (this is optional):
+```python
+myMenu.highlight_select(pages=[[0, 1, 2], [3, 4]])
+```
+
+The above code will create two pages, the first page contains the first three options, the second contains the last two options.<br>
+To switch between these pages, use the left/right arrow keys.<br>
+
+The highlight menu can also disable options:
+```python
+myMenu.highlight_select(disabled_items=[3])
+```
+This code above will prevent to user from selecting index 3 of the menus items (the fourth option).

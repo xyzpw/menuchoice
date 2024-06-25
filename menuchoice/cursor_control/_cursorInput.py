@@ -4,6 +4,7 @@ import shutil
 from . import _textHandler
 
 KEYS_QUIT = [ord("q"), ord("Q")]
+KEYS_SELECT = [curses.KEY_ENTER, 10]
 
 def getMenuComponents(menuString: str):
     menuLines = menuString.splitlines()
@@ -48,7 +49,7 @@ def cursorArrowMenu(stdscr, menuString: str, menuArrow: str, center: bool = Fals
         elif keyPressed == curses.KEY_DOWN:
             nextLineIndex = currentLineIndex + 1
             currentLineIndex = nextLineIndex if currentLineIndex < len(menuLines) - 1 else 0
-        elif keyPressed in [curses.KEY_ENTER, 10]:
+        elif keyPressed in KEYS_SELECT:
             return currentLineIndex
         elif keyPressed in KEYS_QUIT:
             return
@@ -117,7 +118,7 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
         elif keyPressed == curses.KEY_DOWN:
             nextLineIndex = currentLineIndex + 1
             currentLineIndex = int(nextLineIndex) if currentLineIndex < len(menuLines) - 1 else 0
-        elif keyPressed in [curses.KEY_ENTER, 10]:
+        elif keyPressed in KEYS_SELECT:
             if currentLineIndex == len(menuLines) - 2 and allowAll:
                 selectedItems = list(range(len(menuLines) - 2)) if selectedItems != list(range(len(menuLines) - 2)) else []
                 continue
@@ -160,7 +161,55 @@ def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False, dis
             currentLineIndex = min([i for i in enabledOptions if i > currentLineIndex]) if currentLineIndex != max(enabledOptions) else min(enabledOptions)
         elif keyPressed == curses.KEY_UP:
             currentLineIndex = max([i for i in enabledOptions if i < currentLineIndex]) if currentLineIndex != min(enabledOptions) else max(enabledOptions)
-        elif keyPressed in [curses.KEY_ENTER, 10]:
+        elif keyPressed in KEYS_SELECT:
             return currentLineIndex
         elif keyPressed in KEYS_QUIT:
+            return
+
+def highlightMultiPageSelectMenu(stdscr, menuComponents: tuple, center: bool = False,
+                                 disabled_options: list[int] = [], pages: list[list] = []):
+    curses.curs_set(0)
+    curses.use_default_colors()
+    menuLines = menuComponents[0]
+    menuTitle = menuComponents[1]
+    menuDescription = menuComponents[2]
+    currentPageNumber, currentPageIndex = 1, 0
+    enabledOptions = [i for i in range(len(menuLines)) if i not in disabled_options]
+    enabledPageOptions = []
+    for p in pages:
+        enabledPageOptions.append([i for i in p if i in enabledOptions])
+    currentLineIndex = min(enabledOptions)
+    while True:
+        stdscr.erase()
+        stdscr.refresh()
+        pageDisplayText = f"Page {currentPageNumber} of {len(pages)}"
+        if center: stdscr.addstr(_textHandler.getItemSpacing([pageDisplayText]))
+        stdscr.addstr(pageDisplayText + "\n\n")
+        if menuTitle != None:
+            if center: stdscr.addstr(_textHandler.getItemSpacing([menuTitle]))
+            stdscr.addstr(menuTitle + "\n\n")
+        if menuDescription != None:
+            if center: stdscr.addstr(_textHandler.getItemSpacing([menuDescription]))
+            stdscr.addstr(menuDescription + "\n\n")
+        for l in pages[currentPageIndex]:
+            _strToAdd = "%s\n" % menuLines[l]
+            if center: stdscr.addstr(_textHandler.getItemSpacing(_strToAdd))
+            stdscr.addstr(_strToAdd) if currentLineIndex != l else stdscr.addstr(_strToAdd, curses.A_REVERSE)
+        pressedKey = stdscr.getch()
+        workingEnabledPageOptions = enabledPageOptions[currentPageIndex]
+        if pressedKey == curses.KEY_DOWN:
+            currentLineIndex = min([i for i in workingEnabledPageOptions if i > currentLineIndex]) if currentLineIndex != max(workingEnabledPageOptions) else min(workingEnabledPageOptions)
+        elif pressedKey == curses.KEY_UP:
+            currentLineIndex = max([i for i in range(min(workingEnabledPageOptions), currentLineIndex)]) if currentLineIndex != min(workingEnabledPageOptions) else max(workingEnabledPageOptions)
+        elif pressedKey == curses.KEY_RIGHT:
+            currentPageIndex = (currentPageIndex + 1) if currentPageIndex != len(pages)-1 else 0
+            currentPageNumber = currentPageIndex + 1
+            currentLineIndex = min(enabledPageOptions[currentPageIndex])
+        elif pressedKey == curses.KEY_LEFT:
+            currentPageIndex = (currentPageIndex - 1) if currentPageIndex != 0 else len(pages)-1
+            currentPageNumber = currentPageIndex + 1
+            currentLineIndex = min(enabledPageOptions[currentPageIndex])
+        elif pressedKey in KEYS_SELECT:
+            return currentLineIndex
+        elif pressedKey in KEYS_QUIT:
             return

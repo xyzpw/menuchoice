@@ -1,6 +1,9 @@
 # Changelog
 
-## v0.8
+## v0.9 (2024-06-24)
+- added pages to highlight select
+
+## v0.8 (2024-06-18)
 - added the ability to disable selectable options within the `highlight_select` method
 
 ## v0.7 (2024-06-10)
