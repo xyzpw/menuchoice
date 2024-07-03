@@ -6,9 +6,9 @@ from .cursor_control import _cursorInput
 from .exceptions import *
 from . import _validator
 
-__version__ = "0.9"
+__version__ = "0.10"
 __author__ = "xyzpw"
-__description__ = "Command line menu selector."
+__description__ = "A terminal-based interactive menu selector which is controlled via arrow keys."
 __license__ = "MIT"
 
 class MenuSelector:
@@ -41,6 +41,9 @@ class MenuSelector:
         :param num_sep: separator between number and item, e.g. ) for N)
         :param align: aligns items by adding additional spaces between items and their descriptions
         :param max_items: a range of numbers which represent the number of items required to be selected
+            :example:
+                (1, 3)
+                More than 1 option must be selected, but no greater than 3.
         :param clear: clears the screen prior to displaying the menu
         :param allow_all: adds a select all option to the item list
         :param center: positions the menu selector to the center of the terminal"""
@@ -67,6 +70,9 @@ class MenuSelector:
         :param align: aligns items by adding additional spaces between items and their descriptions
         :param arrow: the string which represents the arrow that points to the text which will be selected
         :param max_items: a range of numbers which represent the number of items required to be selected
+            :Example:
+                (1, 3)
+                More than 1 option must be selected, but no greater than 3.
         :param allow_all: adds a select all option to the item list
         :param center: positions the menu selector to the center of the terminal"""
         if allow_all:
@@ -87,8 +93,14 @@ class MenuSelector:
         """Highlights the options at the current line index.
 
         :param center: positions the menu selector to the center of the terminal
-        :param disabled_options: an array which contains the indexes of items that cannot be selected
-        :param pages: a list of arrays which represent a page containing integers pointing to the indexes of items"""
+        :param disabled_options: list of indexes indicating options that cannot be selected
+            Example:
+                [0, 1]
+                Disables item indexes 0 and 1 from being selected.
+        :param pages: a list of arrays which represent a page containing integers pointing to the indexes of items
+            Example:
+                [[0, 1], [2, 3]]
+                Sets item indexes 0 and 1 into page 1 and indexes 2 and 3 into page 2."""
         if not isinstance(pages, list): raise MenuItemError("pages must be an array")
         if set([i for i in range(len(self.items))]) == set(disabled_options):
             raise MenuItemError("at least one item must be selectable")
@@ -109,4 +121,18 @@ class MenuSelector:
         else:
             selectedIndex = curses.wrapper(_cursorInput.highlightSelectMenu, menuComponents, center, disabled_options)
         usrChoice = [(selectedIndex, list(self.items)[selectedIndex])] if selectedIndex != None else []
+        return usrChoice
+    def modify_select(self, center: bool = False, options: list[tuple] = [], disabled_options: list[int] = []):
+        """A menu selector which allows the user to user to use left/right arrow keys to alter through options.
+
+            :param center: positions the menu selector to the center of the terminal
+            :param options: an array containing tuples to represent each option for that index
+                Example:
+                    [(0, "second option to menu index 0", "third option to menu index 0"), (1, "second option for menu index 1")]
+            :param disabled_options: a list of indexes indicating options that cannot be selected
+                Example:
+                    [0, 1]
+                    Disables item indexes 0 and 1 from being selected."""
+        menuComponents = self.items, self.title, self.description
+        usrChoice = curses.wrapper(_cursorInput.editableMenu, menuComponents, center, options, disabled_options)
         return usrChoice

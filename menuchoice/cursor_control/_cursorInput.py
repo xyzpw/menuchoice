@@ -213,3 +213,69 @@ def highlightMultiPageSelectMenu(stdscr, menuComponents: tuple, center: bool = F
             return currentLineIndex
         elif pressedKey in KEYS_QUIT:
             return
+
+def editableMenu(stdscr, menuComponents: dict, center: bool = False, options: list[tuple] = [], disabled_options: list[int] = []):
+    menuItems, menuTitle, menuDescription = menuComponents[0], menuComponents[1], menuComponents[2]
+    enabledIndexes = [i for i in range(len(menuItems)) if not i in disabled_options]
+    currentLineIndex = min(enabledIndexes)
+    checkItemModifiable = lambda _itemIndex: _itemIndex in [i[0] for i in options]
+    getItemOptionCount = lambda _itemIndex: len([i for i in options if i[0] == _itemIndex][0]) # don't subtract 1 to account for default value
+    modifiableItems = {}
+    for i in menuItems:
+        if checkItemModifiable(menuItems.index(i)):
+            # Creating a dictionary — named `modifiableItems` — containing info for each modifiable item:
+                # key is the index out of all items in the menu selector
+                # key value is the index to the options value tuple value which contains the menu item string
+                # option list example:
+                    # [(0, "second selectable item text"), (1, "second selectable item text for second menu item")]
+            modifiableItems[menuItems.index(i)] = 0
+    curses.curs_set(0)
+    curses.use_default_colors()
+    while True:
+        stdscr.refresh()
+        stdscr.erase()
+        if menuTitle != None:
+            if center: stdscr.addstr(_textHandler.getItemSpacing([menuTitle]))
+            stdscr.addstr("%s\n\n" % menuTitle)
+        if menuDescription != None:
+            if center: stdscr.addstr(_textHandler.getItemSpacing([menuDescription]))
+            stdscr.addstr("%s\n\n" % menuDescription)
+        for i in menuItems:
+            if checkItemModifiable(menuItems.index(i)):
+                _currentModifiableStringIndex = modifiableItems[menuItems.index(i)]
+                #NOTE: displayed option is default if the index is 0
+                if _currentModifiableStringIndex != 0:
+                    _currentModifiableString = [o[_currentModifiableStringIndex] for o in options if o[0] == menuItems.index(i)][0]
+                else:
+                    _currentModifiableString = str(i)
+                _strToAdd = "< %s >\n" % _currentModifiableString
+            else:
+                _strToAdd = "%s\n" % i
+            if center: stdscr.addstr(_textHandler.getItemSpacing([i]))
+            stdscr.addstr(_strToAdd) if currentLineIndex != menuItems.index(i) else stdscr.addstr(_strToAdd, curses.A_REVERSE)
+        pressedKey = stdscr.getch()
+        if pressedKey == curses.KEY_DOWN:
+            currentLineIndex = min([i for i in range(currentLineIndex+1, len(menuItems)) if not i in disabled_options]) if currentLineIndex != max(enabledIndexes) else min(enabledIndexes)
+        elif pressedKey == curses.KEY_UP:
+            currentLineIndex = max([i for i in range(currentLineIndex) if not i in disabled_options]) if currentLineIndex != min(enabledIndexes) else max(enabledIndexes)
+        elif pressedKey == curses.KEY_RIGHT:
+            if not checkItemModifiable(currentLineIndex): continue
+            if modifiableItems[currentLineIndex] + 1 > getItemOptionCount(currentLineIndex) - 1:
+                modifiableItems[currentLineIndex] = 0
+                continue
+            modifiableItems[currentLineIndex] += 1
+        elif pressedKey == curses.KEY_LEFT:
+            if not checkItemModifiable(currentLineIndex): continue
+            if modifiableItems[currentLineIndex] - 1 < 0:
+                modifiableItems[currentLineIndex] = getItemOptionCount(currentLineIndex) - 1
+                continue
+            modifiableItems[currentLineIndex] -= 1
+        elif pressedKey in KEYS_SELECT:
+            if checkItemModifiable(currentLineIndex):
+                _currentModifiableString = [i[modifiableItems[currentLineIndex]] for i in options if i[0] == currentLineIndex][0]
+                if modifiableItems[currentLineIndex] == 0: _currentModifiableString = menuItems[currentLineIndex]
+                return [(currentLineIndex, _currentModifiableString)]
+            else:
+                return [(currentLineIndex, menuItems[currentLineIndex])]
+        elif pressedKey in KEYS_QUIT:
+            return

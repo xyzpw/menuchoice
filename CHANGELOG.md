@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10
+- added the ability to change options prior to selecting them
+- added examples to function docstrings
+
 ## v0.9 (2024-06-24)
 - added pages to highlight select
 
