@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.11
+- ability to change default option highlighted for `highlight_select`
+
 ## v0.10
 - added the ability to change options prior to selecting them
 - added examples to function docstrings

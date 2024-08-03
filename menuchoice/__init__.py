@@ -6,7 +6,7 @@ from .cursor_control import _cursorInput
 from .exceptions import *
 from . import _validator
 
-__version__ = "0.10"
+__version__ = "0.11"
 __author__ = "xyzpw"
 __description__ = "A terminal-based interactive menu selector which is controlled via arrow keys."
 __license__ = "MIT"
@@ -89,7 +89,7 @@ class MenuSelector:
         if not _validator.validateItemSelectionCount(max_items, usrChoices) and bool(usrChoices):
             raise MenuItemError("number of items selected is out of range")
         return usrChoices
-    def highlight_select(self, center: bool = False, disabled_options: list[int] = [], pages: list[list] = []):
+    def highlight_select(self, center: bool = False, disabled_options: list[int] = [], pages: list[list] = [], default_option: int = 0):
         """Highlights the options at the current line index.
 
         :param center: positions the menu selector to the center of the terminal
@@ -100,7 +100,9 @@ class MenuSelector:
         :param pages: a list of arrays which represent a page containing integers pointing to the indexes of items
             Example:
                 [[0, 1], [2, 3]]
-                Sets item indexes 0 and 1 into page 1 and indexes 2 and 3 into page 2."""
+                Sets item indexes 0 and 1 into page 1 and indexes 2 and 3 into page 2.
+        :param default_option: default option which will be highlighted, 0 would be first option
+        """
         if not isinstance(pages, list): raise MenuItemError("pages must be an array")
         if set([i for i in range(len(self.items))]) == set(disabled_options):
             raise MenuItemError("at least one item must be selectable")
@@ -117,9 +119,13 @@ class MenuSelector:
                     if i not in itemsWithPage: itemsWithPage.append(i)
             itemsWithoutPage = [i for i in range(len(self.items)) if i not in itemsWithPage]
             if itemsWithoutPage != []: pages.append([i for i in itemsWithoutPage]) # Creating new page for items not associated with a page
-            selectedIndex = curses.wrapper(_cursorInput.highlightMultiPageSelectMenu, menuComponents, center, disabled_options, pages)
+            selectedIndex = curses.wrapper(
+                _cursorInput.highlightMultiPageSelectMenu, menuComponents, center, disabled_options, pages, default_option
+            )
         else:
-            selectedIndex = curses.wrapper(_cursorInput.highlightSelectMenu, menuComponents, center, disabled_options)
+            selectedIndex = curses.wrapper(
+                _cursorInput.highlightSelectMenu, menuComponents, center, disabled_options, default_option
+            )
         usrChoice = [(selectedIndex, list(self.items)[selectedIndex])] if selectedIndex != None else []
         return usrChoice
     def modify_select(self, center: bool = False, options: list[tuple] = [], disabled_options: list[int] = []):

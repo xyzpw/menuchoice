@@ -132,7 +132,7 @@ def cursorArrowMultiselectMenu(stdscr, menuString: str, maxItemCount: int = None
             return
 
 
-def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False, disabled_options: list[int] = []):
+def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False, disabled_options: list[int] = [], defaultOption: int = 0):
     curses.curs_set(0)
     curses.use_default_colors()
     menuLines: list = menuComponents[0]
@@ -141,6 +141,8 @@ def highlightSelectMenu(stdscr, menuComponents: tuple, center: bool = False, dis
     enabledMenuLines = [i for i in menuLines if menuLines.index(i) not in disabled_options]
     enabledOptions = [i for i in range(len(menuLines)) if i not in disabled_options]
     currentLineIndex = min(enabledOptions)
+    if defaultOption != 0 and defaultOption in enabledOptions:
+        currentLineIndex = int(defaultOption)
     while True:
         stdscr.erase()
         stdscr.refresh()
